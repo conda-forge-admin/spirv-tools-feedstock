@@ -16,3 +16,8 @@ ninja -j%CPU_COUNT%
 if %ERRORLEVEL% neq 0 exit 1
 ninja install
 if %ERRORLEVEL% neq 0 exit 1
+
+cmake -DSRC_DIR="%SRC_DIR%" -DBUILD_DIR="%CD%" ^
+  -DDEST="%LIBRARY_INC%\spirv-tools-private" ^
+  -P "%RECIPE_DIR%\install_private_headers.cmake"
+if %ERRORLEVEL% neq 0 exit 1

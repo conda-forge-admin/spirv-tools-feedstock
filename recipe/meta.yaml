@@ -22,7 +22,7 @@ build:
     # But we expect these to be rather stable
     # so lets try 'x' https://github.com/conda-forge/spirv-tools-feedstock/issues/3
     - {{ pin_subpackage('spirv-tools', 'x') }}
-  number: 2
+  number: 3
 
 requirements:
   build:
@@ -40,12 +40,15 @@ requirements:
 test:
   requires:
     - {{ compiler('cxx') }}
+    # The private headers include the SPIR-V headers
+    - spirv-headers
     - {{ stdlib('c') }}
     - cmake
     - ninja
   files:
     - test/CMakeLists.txt
     - test/main.cpp
+    - test/private_headers.cpp
     - test/compute.spvasm
   commands:
     - spirv-as -h
@@ -55,12 +58,16 @@ test:
     - spirv-opt --strip-debug compute.spv -o stripped.spv
     - spirv-opt -O compute.spv -o optimized.spv
     - spirv-val optimized.spv
+    - test -f ${PREFIX}/include/spirv-tools-private/source/opt/build_module.h  # [unix]
+    - if not exist %LIBRARY_INC%\spirv-tools-private\source\opt\build_module.h exit 1  # [win]
     # MSVC single-config generators default to a Debug build, whose debug C++
     # runtime and STL layouts are not ABI compatible with the Release DLLs.
     - cmake -G Ninja -S test -B test-build -DCMAKE_BUILD_TYPE=Release
     - cmake --build test-build
     - ./test-build/test-spirv-tools  # [unix]
     - test-build\\test-spirv-tools.exe  # [win]
+    - ./test-build/test-spirv-tools-private  # [unix]
+    - test-build\\test-spirv-tools-private.exe  # [win]
 
 about:
   home: https://github.com/KhronosGroup/SPIRV-Tools

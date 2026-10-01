@@ -15,3 +15,7 @@ cmake ${CMAKE_ARGS} \
 
 make -j${CPU_COUNT}
 make install
+
+cmake -DSRC_DIR="${SRC_DIR}" -DBUILD_DIR="${PWD}" \
+  -DDEST="${PREFIX}/include/spirv-tools-private" \
+  -P "${RECIPE_DIR}/install_private_headers.cmake"
